@@ -1,0 +1,127 @@
+import { StyleSheet } from "react-native";
+
+export const COLORS = {
+  primary: "#020bb5",
+  deepIndigo: "#0a008e",
+  emerald: "#00C9A7",
+  backdrop: "#F4F7FE",
+  headline: "#1B2559",
+  white: "#FFFFFF",
+  muted: "#A3AED0",
+};
+
+export const authStyles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: COLORS.backdrop,
+  },
+  scrollContent: {
+    flexGrow: 1,
+    alignItems: "center",
+    paddingHorizontal: 24,
+    paddingVertical: 48,
+    gap: 32,
+  },
+  logoWrapper: {
+    width: "100%",
+    alignItems: "center",
+    marginBottom: 8,
+  },
+  logo: {
+    width: 160,
+    height: 160,
+    resizeMode: "contain",
+  },
+  formSection: {
+    width: "100%",
+    gap: 20,
+  },
+  fieldGroup: {
+    width: "100%",
+  },
+  label: {
+    fontFamily: "Nunito_700Bold",
+    fontSize: 16,
+    color: COLORS.headline,
+    marginBottom: 6,
+  },
+  input: {
+    width: "100%",
+    borderRadius: 40,
+    borderWidth: 1.5,
+    borderColor: COLORS.deepIndigo,
+    backgroundColor: COLORS.white,
+    paddingHorizontal: 20,
+    paddingVertical: 14,
+    fontFamily: "Nunito_400Regular",
+    fontSize: 16,
+    color: COLORS.headline,
+    shadowColor: COLORS.deepIndigo,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 3,
+  },
+  ctaButton: {
+    width: "100%",
+    borderRadius: 40,
+    paddingVertical: 16,
+    backgroundColor: COLORS.emerald,
+    alignItems: "center",
+    justifyContent: "center",
+    shadowColor: COLORS.deepIndigo,
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.25,
+    shadowRadius: 10,
+    elevation: 4,
+  },
+  ctaText: {
+    fontFamily: "Nunito_700Bold",
+    color: COLORS.white,
+    fontSize: 18,
+  },
+  dividerRow: {
+    width: "100%",
+    alignItems: "center",
+    gap: 8,
+  },
+  dividerLabel: {
+    fontFamily: "Nunito_600SemiBold",
+    color: COLORS.headline,
+    fontSize: 16,
+  },
+  googleButton: {
+    width: "100%",
+    borderRadius: 40,
+    paddingVertical: 14,
+    backgroundColor: COLORS.primary,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 12,
+    shadowColor: COLORS.deepIndigo,
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.25,
+    shadowRadius: 10,
+    elevation: 4,
+  },
+  googleText: {
+    fontFamily: "Nunito_700Bold",
+    color: COLORS.white,
+    fontSize: 16,
+  },
+  footerText: {
+    fontFamily: "Nunito_400Regular",
+    color: COLORS.headline,
+    fontSize: 14,
+    textAlign: "center",
+  },
+  footerLink: {
+    fontFamily: "Nunito_700Bold",
+    color: COLORS.primary,
+    fontSize: 14,
+  },
+  inputIconButton: {
+    padding: 4,
+  },
+});

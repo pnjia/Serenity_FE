@@ -1,0 +1,26 @@
+[
+  {
+    "id": "b338741f-f3a1-410c-95d9-3a4330300ca0",
+    "name": "Panji Angkaasa Putra",
+    "email": "panjiap@gmail.com",
+    "passwordHash": "$2a$10$mU2ptCuNMBb8A1UZNDWeNu0sgT46O81lJ63DKPOYolQTN532n0Kf2",
+    "provider": "local",
+    "createdAt": "2025-12-10T02:01:20.557Z"
+  },
+  {
+    "id": "5bbb6bb9-597a-4f8a-90fa-ecc7e3e92b71",
+    "name": "Panji Angkasa Putra",
+    "email": "panjia123@gmail.com",
+    "passwordHash": "$2a$10$Z1uybMt7GsBJ8FA4xYCr1uZFUeSt1W.x5j0IZMzM0MWdXt1OpuwaG",
+    "provider": "local",
+    "createdAt": "2025-12-10T02:31:02.842Z"
+  },
+  {
+    "id": "b9b1ca14-e455-4d47-9628-b3b5f2eb5b25",
+    "name": "panji",
+    "email": "panji@gmail.com",
+    "passwordHash": "$2a$10$YBPh2LS/VmhYgp9lj5r5WeGDlMXbwqBhupxHDrqOgZQhWhSW6BEMm",
+    "provider": "local",
+    "createdAt": "2025-12-10T02:58:20.482Z"
+  }
+]
