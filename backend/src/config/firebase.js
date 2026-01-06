@@ -19,23 +19,33 @@ const firebaseConfig = {
 // Initialize Firebase Admin SDK with service account
 if (!admin.apps.length) {
   try {
-    // Path to service account key
-    const serviceAccountPath = path.join(
-      __dirname,
-      "../../serviceAccountKey.json"
-    );
-
-    // Check if service account key exists
     let serviceAccount;
-    try {
-      serviceAccount = JSON.parse(readFileSync(serviceAccountPath, "utf-8"));
-      console.log("✓ Service account key loaded successfully");
-    } catch (error) {
-      console.error("❌ Service account key not found at:", serviceAccountPath);
-      console.error(
-        "Please download it from Firebase Console and place it in the backend root directory"
-      );
-      console.error("Falling back to default credentials...");
+
+    // Try to load from environment variable first (for Vercel/production)
+    if (process.env.FIREBASE_SERVICE_ACCOUNT) {
+      try {
+        serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
+        console.log("✓ Service account loaded from environment variable");
+      } catch (error) {
+        console.error("❌ Failed to parse FIREBASE_SERVICE_ACCOUNT:", error);
+      }
+    }
+
+    // Fallback to local file (for development)
+    if (!serviceAccount) {
+      try {
+        const serviceAccountPath = path.join(
+          __dirname,
+          "../../serviceAccountKey.json"
+        );
+        serviceAccount = JSON.parse(readFileSync(serviceAccountPath, "utf-8"));
+        console.log("✓ Service account key loaded from file");
+      } catch (error) {
+        console.error("❌ Service account key not found");
+        console.error(
+          "Please set FIREBASE_SERVICE_ACCOUNT environment variable or add serviceAccountKey.json"
+        );
+      }
     }
 
     if (serviceAccount) {
