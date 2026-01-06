@@ -27,7 +27,8 @@ if (!admin.apps.length) {
         serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
         console.log("✓ Service account loaded from environment variable");
       } catch (error) {
-        console.error("❌ Failed to parse FIREBASE_SERVICE_ACCOUNT:", error);
+        console.error("❌ Failed to parse FIREBASE_SERVICE_ACCOUNT:", error.message);
+        throw new Error("Invalid FIREBASE_SERVICE_ACCOUNT format");
       }
     }
 
@@ -42,28 +43,20 @@ if (!admin.apps.length) {
         console.log("✓ Service account key loaded from file");
       } catch (error) {
         console.error("❌ Service account key not found");
-        console.error(
-          "Please set FIREBASE_SERVICE_ACCOUNT environment variable or add serviceAccountKey.json"
+        throw new Error(
+          "Firebase credentials not found. Please set FIREBASE_SERVICE_ACCOUNT environment variable or add serviceAccountKey.json"
         );
       }
     }
 
-    if (serviceAccount) {
-      // Initialize with service account (full access)
-      admin.initializeApp({
-        credential: admin.credential.cert(serviceAccount),
-        databaseURL: `https://${firebaseConfig.projectId}.firebaseio.com`,
-      });
-      console.log(
-        "✓ Firebase Admin initialized with service account (full access)"
-      );
-    } else {
-      // Fallback: Initialize with default credentials or project ID
-      admin.initializeApp({
-        projectId: firebaseConfig.projectId,
-      });
-      console.log("⚠ Firebase Admin initialized with limited access");
-    }
+    // Initialize with service account (full access)
+    admin.initializeApp({
+      credential: admin.credential.cert(serviceAccount),
+      databaseURL: `https://${firebaseConfig.projectId}.firebaseio.com`,
+    });
+    console.log(
+      "✓ Firebase Admin initialized with service account (full access)"
+    );
   } catch (error) {
     console.error("❌ Firebase Admin initialization error:", error);
     throw error;
