@@ -179,10 +179,20 @@ export const authenticateWithGoogle = async (
   const endpoint =
     intent === "register" ? "/auth/google/register" : "/auth/google/login";
 
-  const result = (await request(endpoint, {
-    method: "POST",
-    body: JSON.stringify({ idToken }),
-  })) as AuthResponse;
+  console.log(`[authService] Calling ${endpoint}...`);
 
-  return persistSession(result);
+  try {
+    const result = (await request(endpoint, {
+      method: "POST",
+      body: JSON.stringify({ idToken }),
+    })) as AuthResponse;
+
+    console.log(
+      "[authService] Authentication successful, persisting session..."
+    );
+    return persistSession(result);
+  } catch (error) {
+    console.error(`[authService] ${endpoint} failed:`, error);
+    throw error;
+  }
 };

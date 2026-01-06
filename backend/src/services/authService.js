@@ -1,5 +1,5 @@
 import { randomUUID } from "crypto";
-import { UserStore } from "../data/userStore.js";
+import { UserStore } from "../data/firestoreUserStore.js";
 import { verifyGoogleToken } from "../utils/googleVerifier.js";
 import { signToken } from "../utils/jwt.js";
 import { hashPassword, verifyPassword } from "../utils/password.js";
@@ -54,7 +54,9 @@ export const loginLocalUser = async ({ email, password }) => {
 };
 
 export const registerGoogleUser = async ({ idToken }) => {
+  console.log("[authService] Starting Google registration...");
   const profile = await verifyGoogleToken(idToken);
+
   if (!profile.emailVerified) {
     throw new Error("Email Google belum terverifikasi.");
   }
@@ -76,17 +78,45 @@ export const registerGoogleUser = async ({ idToken }) => {
   };
 
   await UserStore.create(newUser);
+  console.log(
+    "[authService] Google user registered successfully:",
+    newUser.email
+  );
   return buildAuthResponse(newUser);
 };
 
 export const loginGoogleUser = async ({ idToken }) => {
+  console.log("[authService] Starting Google login...");
   const profile = await verifyGoogleToken(idToken);
   const normalizedEmail = normalizeEmail(profile.email);
-  const user = await UserStore.findByEmail(normalizedEmail);
+  let user = await UserStore.findByEmail(normalizedEmail);
 
-  if (!user || user.provider !== "google") {
+  // Auto-register if user doesn't exist
+  if (!user) {
+    console.log("[authService] User not found, auto-registering...");
+    const newUser = {
+      id: randomUUID(),
+      name: profile.name,
+      email: normalizedEmail,
+      passwordHash: null,
+      provider: "google",
+      picture: profile.picture,
+      createdAt: new Date().toISOString(),
+    };
+    await UserStore.create(newUser);
+    user = newUser;
+    console.log(
+      "[authService] Google user auto-registered successfully:",
+      user.email
+    );
+  } else if (user.provider !== "google") {
     throw new Error(
-      "Akun Google belum terdaftar. Silakan daftar terlebih dahulu."
+      "Email sudah terdaftar dengan provider lain. Silakan gunakan email/password untuk login."
+    );
+  } else {
+    console.log(
+      "[authService] Google user logged in successfully:",
+      user.email
     );
   }
 

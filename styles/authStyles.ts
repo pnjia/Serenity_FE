@@ -14,6 +14,7 @@ export const authStyles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: COLORS.backdrop,
+    alignItems: "center",
   },
   scrollContent: {
     flexGrow: 1,
@@ -21,6 +22,8 @@ export const authStyles = StyleSheet.create({
     paddingHorizontal: 24,
     paddingVertical: 48,
     gap: 32,
+    width: "100%",
+    maxWidth: 500,
   },
   logoWrapper: {
     width: "100%",
@@ -123,5 +126,11 @@ export const authStyles = StyleSheet.create({
   },
   inputIconButton: {
     padding: 4,
+  },
+  errorText: {
+    fontFamily: "Nunito_600SemiBold",
+    color: "#D14343",
+    fontSize: 13,
+    marginTop: 4,
   },
 });

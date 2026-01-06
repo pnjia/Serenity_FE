@@ -76,7 +76,16 @@ Join our community of developers creating universal apps.
    EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID=<Client ID Web>
    # Opsional: jika menggunakan Expo Go
    EXPO_PUBLIC_GOOGLE_EXPO_CLIENT_ID=<Client ID Expo>
+   # Set ke "true" hanya jika ingin memakai Expo Auth Proxy (HTTPS)
+   EXPO_PUBLIC_USE_EXPO_AUTH_PROXY=false
+      EXPO_PUBLIC_GOOGLE_REDIRECT_URL=http://127.0.0.1:4000/auth/google/callback
    ```
+
+   Daftarkan redirect URI berikut di Google Cloud Console (menu Credentials → OAuth Client):
+
+   - `http://127.0.0.1:4000/auth/google/callback` jika memakai flow lokal berbasis backend
+   - `serenity:/oauthredirect` untuk build native/dev client
+   - `https://auth.expo.io/@<expo_username>/<slug>` hanya jika `EXPO_PUBLIC_USE_EXPO_AUTH_PROXY=true`
 
 4. Setelah backend berjalan dan variabel lingkungan terpasang, jalankan aplikasi Expo seperti biasa (`npx expo start`).
 

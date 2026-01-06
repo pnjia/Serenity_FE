@@ -1,88 +1,241 @@
-# Serenity Auth API
+# Serenity Backend API
 
-Express.js backend that mirrors the mobile app's authentication flow using JWT, Google OAuth2 verification, and file-based persistence via `src/data/users.json`.
+Backend API untuk aplikasi Serenity dengan autentikasi JWT, Google OAuth, dan Firebase Firestore.
 
-## Setup
+## 🚀 Features
 
-1. Copy `.env.example` → `.env` and fill values:
+- ✅ JWT Authentication
+- ✅ Local registration/login (email/password)
+- ✅ Google OAuth integration
+- ✅ Firebase Firestore database
+- ✅ Game scores & leaderboard system
+- ✅ User progress tracking (streak, achievements)
+- ✅ RESTful API endpoints
 
-```bash
-PORT=4000
-JWT_SECRET=super_secret_key
-GOOGLE_CLIENT_ID=your_google_oauth_client_id.apps.googleusercontent.com
-```
+## 📋 Prerequisites
 
-2. Install dependencies:
+- Node.js >= 18
+- Firebase project
+- Google OAuth credentials
+
+## 🛠️ Setup
+
+### 1. Install Dependencies
 
 ```bash
 npm install
 ```
 
-3. Start the server:
+### 2. Firebase Setup
+
+**Important:** Follow the [FIREBASE_SETUP.md](./FIREBASE_SETUP.md) guide for detailed Firebase configuration.
+
+Quick setup:
+
+1. Create Firebase project at https://console.firebase.google.com/
+2. Enable Firestore Database
+3. Download service account key (Project Settings → Service Accounts → Generate New Private Key)
+4. Save it as `serviceAccountKey.json` in the backend root directory
+5. Add `serviceAccountKey.json` to `.gitignore` (already configured)
+
+### 3. Environment Variables
+
+Create a `.env` file:
+
+```bash
+# Server
+PORT=4000
+
+# JWT Secret (change to a strong random string)
+JWT_SECRET=your_super_secret_jwt_key_here
+
+# Google OAuth Client ID (for token verification)
+GOOGLE_CLIENT_ID=your-google-client-id.apps.googleusercontent.com
+
+# Firebase
+FIREBASE_PROJECT_ID=beginner-project-4f054
+GOOGLE_APPLICATION_CREDENTIALS=./serviceAccountKey.json
+```
+
+### 4. Start the Server
+
+Development mode (with auto-reload):
 
 ```bash
 npm run dev
 ```
 
-The API will be available at `http://localhost:4000` (or custom `PORT`).
+Production mode:
 
-## Endpoints
+```bash
+npm start
+```
 
-| Method | Path                    | Description                                                       |
-| ------ | ----------------------- | ----------------------------------------------------------------- |
-| `POST` | `/auth/register`        | Register local account (`name`, `email`, `password`)              |
-| `POST` | `/auth/login`           | Login with email/password                                         |
-| `POST` | `/auth/google/register` | Register via Google ID token                                      |
-| `POST` | `/auth/google/login`    | Login via Google ID token                                         |
-| `GET`  | `/auth/me`              | Get current user profile (requires `Authorization: Bearer <JWT>`) |
+The API will be available at `http://localhost:4000`.
 
-### Request Details
+## 📚 API Documentation
 
-#### Register
+### Authentication Endpoints
+
+#### POST `/auth/register`
+
+Register a new user with email and password.
+
+**Request:**
 
 ```json
-POST /auth/register
 {
-  "name": "Serenity User",
-  "email": "user@example.com",
-  "password": "secret123"
+  "name": "John Doe",
+  "email": "john@example.com",
+  "password": "password123"
 }
 ```
 
-#### Login
+**Response:**
 
 ```json
-POST /auth/login
 {
-  "email": "user@example.com",
-  "password": "secret123"
+  "user": {
+    "id": "uuid",
+    "name": "John Doe",
+    "email": "john@example.com",
+    "provider": "local",
+    "createdAt": "2024-01-01T00:00:00.000Z"
+  },
+  "token": "jwt_token_here"
 }
 ```
 
-#### Google Register/Login
+#### POST `/auth/login`
+
+Login with email and password.
+
+#### POST `/auth/google/register` & `/auth/google/login`
+
+Google OAuth authentication.
+
+#### GET `/auth/me`
+
+Get current user profile (requires authentication).
+
+### Game Endpoints
+
+All game endpoints require authentication (Bearer token).
+
+#### POST `/game/scores`
+
+Save a game score.
+
+**Request:**
 
 ```json
-POST /auth/google/register
 {
-  "idToken": "GOOGLE_ID_TOKEN"
+  "gameType": "pola-warna",
+  "score": 150,
+  "level": 5
 }
 ```
 
-Same payload for `/auth/google/login`. Tokens are verified using the configured `GOOGLE_CLIENT_ID`.
+Game types: `pola-warna`, `mengorganisir`, `logika-zen`, `ritme-suara`
 
-#### Profile
+#### GET `/game/scores?gameType=pola-warna`
+
+Get user's scores (optionally filter by game type).
+
+#### GET `/game/scores/best/:gameType`
+
+Get user's best score for a specific game.
+
+#### GET `/game/leaderboard/:gameType?limit=10`
+
+Get leaderboard for a specific game.
+
+#### GET `/game/progress`
+
+Get user's progress (streak, total games played, achievements).
+
+## 🗄️ Database Structure
+
+### Firestore Collections
+
+- **users**: User accounts (local & Google OAuth)
+- **game_scores**: Individual game scores
+- **user_progress**: Streak, total games, achievements
+
+See [FIREBASE_SETUP.md](./FIREBASE_SETUP.md) for detailed schema.
+
+## 🔄 Migration from JSON to Firestore
+
+If you have existing users in `users.json`:
+
+```bash
+node src/scripts/migrateToFirestore.js
+```
+
+## 🧪 Testing
+
+### Manual Testing with cURL
+
+Register:
+
+```bash
+curl -X POST http://localhost:4000/auth/register \
+  -H "Content-Type: application/json" \
+  -d '{"name":"Test User","email":"test@example.com","password":"password123"}'
+```
+
+Save Score:
+
+```bash
+curl -X POST http://localhost:4000/game/scores \
+  -H "Authorization: Bearer YOUR_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"gameType":"pola-warna","score":150,"level":5}'
+```
+
+## 🔒 Security Notes
+
+- Never commit `.env` or `serviceAccountKey.json`
+- Use strong JWT secrets in production
+- Set up proper Firestore security rules
+- Enable HTTPS in production
+- Rate limit authentication endpoints
+
+## 📝 Project Structure
 
 ```
-GET /auth/me
-Authorization: Bearer <jwt>
+backend/
+├── src/
+│   ├── config/
+│   │   └── firebase.js          # Firebase configuration
+│   ├── controllers/
+│   │   ├── authController.js    # Auth endpoints
+│   │   └── gameController.js    # Game endpoints
+│   ├── data/
+│   │   ├── firestoreUserStore.js # Firestore user operations
+│   │   └── gameStore.js         # Game scores & progress
+│   ├── middleware/
+│   │   ├── authMiddleware.js    # JWT verification
+│   │   ├── errorHandler.js      # Error handling
+│   │   └── validateRequest.js   # Input validation
+│   ├── routes/
+│   │   ├── authRoutes.js        # Auth routes
+│   │   └── gameRoutes.js        # Game routes
+│   ├── services/
+│   │   └── authService.js       # Business logic
+│   ├── utils/
+│   │   ├── jwt.js               # JWT utilities
+│   │   ├── password.js          # Password hashing
+│   │   └── googleVerifier.js    # Google token verification
+│   ├── scripts/
+│   │   └── migrateToFirestore.js # Migration script
+│   └── index.js                 # Entry point
+├── .env                         # Environment variables
+├── serviceAccountKey.json       # Firebase credentials (not in git)
+├── FIREBASE_SETUP.md            # Firebase setup guide
+└── README.md
 ```
 
-## Error Handling
+## 📄 License
 
-- Validation errors return `422` with detailed messages.
-- Auth failures return `401` or `403` depending on context.
-- All other issues flow through the centralized `errorHandler` middleware.
-
-## File Storage
-
-User records are stored in `src/data/users.json`. This keeps the API lightweight but should be replaced with a database like Postgres or MongoDB for production.
+MIT

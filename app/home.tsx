@@ -24,7 +24,7 @@ export default function Home() {
         try {
           const profile = await fetchProfile();
           if (!profile) {
-            router.replace({ pathname: "/" });
+            router.replace({ pathname: "/login" } as any);
             return;
           }
 
@@ -40,7 +40,7 @@ export default function Home() {
             Alert.alert("Autentikasi", message, [
               {
                 text: "OK",
-                onPress: () => router.replace({ pathname: "/" }),
+                onPress: () => router.replace({ pathname: "/login" } as any),
               },
             ]);
           }
@@ -63,7 +63,7 @@ export default function Home() {
     setIsLoggingOut(true);
     try {
       await logoutUser();
-      router.replace({ pathname: "/" });
+      router.replace({ pathname: "/login" } as any);
     } catch (error) {
       const message =
         error instanceof Error

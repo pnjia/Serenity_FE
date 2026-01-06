@@ -6,6 +6,7 @@ export const homeStyles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: COLORS.backdrop,
+    alignItems: "center",
   },
   content: {
     flex: 1,
@@ -13,6 +14,8 @@ export const homeStyles = StyleSheet.create({
     justifyContent: "center",
     paddingHorizontal: 24,
     paddingVertical: 48,
+    width: "100%",
+    maxWidth: 600,
   },
   card: {
     width: "100%",

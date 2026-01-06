@@ -20,24 +20,19 @@ import { useGoogleAuth } from "../hooks/useGoogleAuth";
 import {
   authenticateWithGoogle,
   ensureSession,
-  registerUser,
+  loginUser,
 } from "../services/authService";
 import { authStyles, COLORS } from "../styles/authStyles";
 
-export default function Register() {
+export default function Index() {
   const router = useRouter();
   const emailValidator = useMemo(() => /^[^\s@]+@[^\s@]+\.[^\s@]+$/, []);
   const [showPassword, setShowPassword] = useState(false);
-  const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isGoogleSubmitting, setIsGoogleSubmitting] = useState(false);
-  const [errors, setErrors] = useState({
-    name: "",
-    email: "",
-    password: "",
-  });
+  const [errors, setErrors] = useState({ email: "", password: "" });
   const [formError, setFormError] = useState("");
   const { isReady: isGoogleReady, getIdToken } = useGoogleAuth();
 
@@ -60,17 +55,11 @@ export default function Register() {
     }, [router])
   );
 
-  const handleRegister = async () => {
-    const trimmedName = fullName.trim();
+  const handleLogin = async () => {
     const trimmedEmail = email.trim();
     const trimmedPassword = password.trim();
 
     const nextErrors = {
-      name: !trimmedName
-        ? "Nama wajib diisi."
-        : trimmedName.length < 3
-        ? "Nama minimal 3 karakter."
-        : "",
       email: !trimmedEmail
         ? "Email wajib diisi."
         : emailValidator.test(trimmedEmail)
@@ -89,26 +78,22 @@ export default function Register() {
     }
 
     setIsSubmitting(true);
+    setFormError("");
     try {
-      await registerUser({
-        name: trimmedName,
-        email: trimmedEmail,
-        password: trimmedPassword,
-      });
+      await loginUser(trimmedEmail, trimmedPassword);
       router.replace("/(tabs)" as any);
     } catch (error) {
       const message =
         error instanceof Error
           ? error.message
-          : "Terjadi kesalahan saat registrasi.";
-      Alert.alert("Registrasi gagal", message);
+          : "Terjadi kesalahan saat login.";
+      setFormError(message);
     } finally {
       setIsSubmitting(false);
-      setFormError("");
     }
   };
 
-  const handleGoogleRegister = async () => {
+  const handleGoogleLogin = async () => {
     if (!isGoogleReady) {
       Alert.alert(
         "Google Login",
@@ -120,24 +105,22 @@ export default function Register() {
     setIsGoogleSubmitting(true);
     setFormError("");
     try {
-      console.log("[Google Register] Starting Google authentication...");
+      console.log("[Google Login] Starting Google authentication...");
       const idToken = await getIdToken();
       console.log(
-        "[Google Register] Got ID token, authenticating with backend..."
+        "[Google Login] Got ID token, authenticating with backend..."
       );
-      await authenticateWithGoogle(idToken, "register");
-      console.log(
-        "[Google Register] Authentication successful, redirecting..."
-      );
+      await authenticateWithGoogle(idToken, "login");
+      console.log("[Google Login] Authentication successful, redirecting...");
       router.replace("/(tabs)" as any);
     } catch (error) {
-      console.error("[Google Register] Error:", error);
+      console.error("[Google Login] Error:", error);
       const message =
         error instanceof Error
           ? error.message
           : "Tidak dapat terhubung ke Google.";
       setFormError(message);
-      Alert.alert("Google Register", message);
+      Alert.alert("Google Login", message);
     } finally {
       setIsGoogleSubmitting(false);
     }
@@ -149,7 +132,7 @@ export default function Register() {
     ? "Menunggu konfigurasi Google"
     : isGoogleSubmitting
     ? "Menghubungkan Google..."
-    : "Daftar dengan Google";
+    : "Lanjutkan dengan Google";
 
   return (
     <SafeAreaView style={authStyles.container}>
@@ -172,24 +155,6 @@ export default function Register() {
           </View>
 
           <View style={authStyles.formSection}>
-            <View style={authStyles.fieldGroup}>
-              <Text style={authStyles.label}>Nama Lengkap</Text>
-              <RetroInput
-                placeholder="Masukkan nama lengkap"
-                placeholderTextColor={COLORS.muted}
-                value={fullName}
-                onChangeText={(value) => {
-                  setFullName(value);
-                  if (errors.name) {
-                    setErrors((prev) => ({ ...prev, name: "" }));
-                  }
-                }}
-              />
-              {errors.name ? (
-                <Text style={authStyles.errorText}>{errors.name}</Text>
-              ) : null}
-            </View>
-
             <View style={authStyles.fieldGroup}>
               <Text style={authStyles.label}>Email</Text>
               <RetroInput
@@ -254,8 +219,8 @@ export default function Register() {
             ) : null}
 
             <RetroButton
-              title={isSubmitting ? "Mendaftarkan..." : "Daftar"}
-              onPress={handleRegister}
+              title={isSubmitting ? "Memproses..." : "Login"}
+              onPress={handleLogin}
               disabled={isSubmitting || isGoogleSubmitting}
             />
 
@@ -270,17 +235,17 @@ export default function Register() {
               leftIcon={
                 <FontAwesome name="google" size={20} color={COLORS.white} />
               }
-              onPress={handleGoogleRegister}
+              onPress={handleGoogleLogin}
               disabled={googleButtonDisabled}
             />
 
             <Text style={authStyles.footerText}>
-              Sudah punya akun?{" "}
+              Belum punya akun?{" "}
               <Link
-                href={{ pathname: "/login" } as any}
+                href={{ pathname: "/register" }}
                 style={authStyles.footerLink}
               >
-                Login
+                Daftar sekarang
               </Link>
             </Text>
           </View>

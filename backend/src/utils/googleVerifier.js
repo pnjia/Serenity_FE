@@ -12,21 +12,33 @@ export const verifyGoogleToken = async (idToken) => {
     );
   }
 
-  const ticket = await client.verifyIdToken({
-    idToken,
-    audience: config.googleClientId,
-  });
+  console.log("[googleVerifier] Verifying Google token...");
 
-  const payload = ticket.getPayload();
+  try {
+    const ticket = await client.verifyIdToken({
+      idToken,
+      audience: config.googleClientId,
+    });
 
-  if (!payload) {
-    throw new Error("Token Google tidak valid");
+    const payload = ticket.getPayload();
+
+    if (!payload) {
+      throw new Error("Token Google tidak valid");
+    }
+
+    console.log(
+      "[googleVerifier] Token verified successfully for:",
+      payload.email
+    );
+
+    return {
+      email: payload.email,
+      name: payload.name || payload.given_name || "Pengguna Google",
+      picture: payload.picture,
+      emailVerified: payload.email_verified,
+    };
+  } catch (error) {
+    console.error("[googleVerifier] Verification failed:", error.message);
+    throw new Error("Gagal memverifikasi token Google: " + error.message);
   }
-
-  return {
-    email: payload.email,
-    name: payload.name || payload.given_name || "Pengguna Google",
-    picture: payload.picture,
-    emailVerified: payload.email_verified,
-  };
 };
