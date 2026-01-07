@@ -27,7 +27,10 @@ if (!admin.apps.length) {
         serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
         console.log("✓ Service account loaded from environment variable");
       } catch (error) {
-        console.error("❌ Failed to parse FIREBASE_SERVICE_ACCOUNT:", error.message);
+        console.error(
+          "❌ Failed to parse FIREBASE_SERVICE_ACCOUNT:",
+          error.message
+        );
         throw new Error("Invalid FIREBASE_SERVICE_ACCOUNT format");
       }
     }

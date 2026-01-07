@@ -6,11 +6,15 @@ import {
   ActivityIndicator,
   Alert,
   Image,
+  ScrollView,
   StyleSheet,
   Text,
   View,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import {
+  SafeAreaView,
+  useSafeAreaInsets,
+} from "react-native-safe-area-context";
 
 import RetroButton from "../../components/RetroButton";
 import { AuthUser, fetchProfile, logoutUser } from "../../services/authService";
@@ -23,6 +27,7 @@ import { COLORS } from "../../styles/authStyles";
 
 export default function Profile() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const [user, setUser] = useState<AuthUser | null>(null);
   const [progress, setProgress] = useState<UserProgress | null>(null);
   const [loading, setLoading] = useState(true);
@@ -119,67 +124,78 @@ export default function Profile() {
           <ActivityIndicator color={COLORS.primary} size="large" />
         </View>
       ) : (
-        <View style={styles.content}>
-          {/* App Logo */}
-          <View style={styles.logoContainer}>
-            <Image
-              source={require("../../assets/images/appLogo.png")}
-              style={styles.logo}
-            />
-          </View>
+        <ScrollView
+          style={styles.scrollView}
+          contentContainerStyle={[
+            styles.scrollContent,
+            { paddingBottom: 140 + insets.bottom },
+          ]}
+          showsVerticalScrollIndicator={false}
+        >
+          <View style={styles.content}>
+            {/* App Logo */}
+            <View style={styles.logoContainer}>
+              <Image
+                source={require("../../assets/images/appLogo.png")}
+                style={styles.logo}
+              />
+            </View>
 
-          {/* Profile Header */}
-          <View style={styles.header}>
-            <View style={styles.avatarContainer}>
-              {user?.picture ? (
-                <Image
-                  source={{ uri: user.picture }}
-                  style={styles.avatarImage}
-                />
-              ) : (
-                <View style={styles.avatar}>
-                  <Ionicons name="person" size={50} color="#020bb5" />
+            {/* Profile Header */}
+            <View style={styles.header}>
+              <View style={styles.avatarContainer}>
+                {user?.picture ? (
+                  <Image
+                    source={{ uri: user.picture }}
+                    style={styles.avatarImage}
+                  />
+                ) : (
+                  <View style={styles.avatar}>
+                    <Ionicons name="person" size={50} color="#020bb5" />
+                  </View>
+                )}
+              </View>
+              <Text style={styles.name}>{user?.name}</Text>
+              {providerLabel && (
+                <Text style={styles.email}>{providerLabel}</Text>
+              )}
+              {user?.provider && (
+                <View style={styles.providerBadge}>
+                  <Text style={styles.providerText}>
+                    {user.provider.toUpperCase()}
+                  </Text>
                 </View>
               )}
             </View>
-            <Text style={styles.name}>{user?.name}</Text>
-            {providerLabel && <Text style={styles.email}>{providerLabel}</Text>}
-            {user?.provider && (
-              <View style={styles.providerBadge}>
-                <Text style={styles.providerText}>
-                  {user.provider.toUpperCase()}
-                </Text>
+
+            {/* Stats Section */}
+            <View style={styles.statsContainer}>
+              <View style={styles.statCard}>
+                <Ionicons name="flame" size={32} color="#FF6B6B" />
+                <Text style={styles.statValue}>{progress?.streak || 0}</Text>
+                <Text style={styles.statLabel}>Day Streak</Text>
               </View>
-            )}
-          </View>
-
-          {/* Stats Section */}
-          <View style={styles.statsContainer}>
-            <View style={styles.statCard}>
-              <Ionicons name="flame" size={32} color="#FF6B6B" />
-              <Text style={styles.statValue}>{progress?.streak || 0}</Text>
-              <Text style={styles.statLabel}>Day Streak</Text>
+              <View style={styles.statCard}>
+                <Ionicons name="game-controller" size={32} color="#020bb5" />
+                <Text style={styles.statValue}>
+                  {progress?.totalGamesPlayed || 0}
+                </Text>
+                <Text style={styles.statLabel}>Games Played</Text>
+              </View>
             </View>
-            <View style={styles.statCard}>
-              <Ionicons name="game-controller" size={32} color="#020bb5" />
-              <Text style={styles.statValue}>
-                {progress?.totalGamesPlayed || 0}
-              </Text>
-              <Text style={styles.statLabel}>Games Played</Text>
+
+            {/* Profile Actions */}
+            <View style={styles.actionsContainer}>
+              <RetroButton
+                title={isLoggingOut ? "Keluar..." : "Keluar"}
+                backgroundColor={COLORS.primary}
+                shadowColor={COLORS.deepIndigo}
+                onPress={handleLogout}
+                disabled={isLoggingOut}
+              />
             </View>
           </View>
-
-          {/* Profile Actions */}
-          <View style={styles.actionsContainer}>
-            <RetroButton
-              title={isLoggingOut ? "Keluar..." : "Keluar"}
-              backgroundColor={COLORS.primary}
-              shadowColor={COLORS.deepIndigo}
-              onPress={handleLogout}
-              disabled={isLoggingOut}
-            />
-          </View>
-        </View>
+        </ScrollView>
       )}
     </SafeAreaView>
   );
@@ -195,16 +211,18 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
-  content: {
+  scrollView: {
     flex: 1,
+  },
+  scrollContent: {
+    flexGrow: 1,
+  },
+  content: {
     padding: 20,
     width: "100%",
-    maxWidth: 700,
-    alignSelf: "center",
   },
   logoContainer: {
     alignItems: "center",
-    marginTop: 20,
     marginBottom: 10,
   },
   logo: {
@@ -214,7 +232,6 @@ const styles = StyleSheet.create({
   },
   header: {
     alignItems: "center",
-    marginTop: 40,
     marginBottom: 40,
   },
   avatarContainer: {
@@ -278,8 +295,6 @@ const styles = StyleSheet.create({
     gap: 16,
     paddingHorizontal: 20,
     marginTop: 20,
-    maxWidth: 500,
-    alignSelf: "center",
     width: "100%",
   },
   statCard: {
@@ -308,13 +323,12 @@ const styles = StyleSheet.create({
     color: "#A3AED0",
     marginTop: 4,
     fontWeight: "600",
+    textAlign: "center",
   },
   actionsContainer: {
     marginTop: "auto",
-    paddingBottom: 100, // Account for tab bar
     paddingHorizontal: 20,
     width: "100%",
-    maxWidth: 500,
-    alignSelf: "center",
+    marginBottom: 20,
   },
 });

@@ -127,22 +127,24 @@ export default function QuestsScreen() {
           <ActivityIndicator size="large" color={COLORS.primary} />
         </View>
       ) : (
-        <FlatList
-          data={quests}
-          renderItem={renderQuestItem}
-          keyExtractor={(item) => item.id}
-          contentContainerStyle={styles.listContainer}
-          ListEmptyComponent={
-            <View style={styles.emptyContainer}>
-              <Ionicons
-                name="checkbox-outline"
-                size={64}
-                color={COLORS.muted}
-              />
-              <Text style={styles.emptyText}>Belum ada quest tersedia</Text>
-            </View>
-          }
-        />
+        <View style={{ flex: 1, width: "100%" }}>
+          <FlatList
+            data={quests}
+            renderItem={renderQuestItem}
+            keyExtractor={(item) => item.id}
+            contentContainerStyle={styles.listContainer}
+            ListEmptyComponent={
+              <View style={styles.emptyContainer}>
+                <Ionicons
+                  name="checkbox-outline"
+                  size={64}
+                  color={COLORS.muted}
+                />
+                <Text style={styles.emptyText}>Belum ada quest tersedia</Text>
+              </View>
+            }
+          />
+        </View>
       )}
     </SafeAreaView>
   );
@@ -198,17 +200,16 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   listContainer: {
-    padding: 20,
-    gap: 16,
-    width: "100%",
-    maxWidth: 800,
-    alignSelf: "center",
-    paddingBottom: 100,
+    paddingHorizontal: 20,
+    paddingTop: 10,
+    paddingBottom: 120,
   },
   questCard: {
     backgroundColor: COLORS.white,
     borderRadius: 16,
-    padding: 20,
+    padding: 24,
+    minHeight: 160,
+    marginBottom: 20,
     shadowColor: COLORS.primary,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.08,
@@ -218,15 +219,16 @@ const styles = StyleSheet.create({
   questHeader: {
     flexDirection: "row",
     gap: 16,
-    marginBottom: 16,
+    marginBottom: 18,
   },
   questIcon: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
+    width: 56,
+    height: 56,
+    borderRadius: 28,
     backgroundColor: "#F0F4FF",
     justifyContent: "center",
     alignItems: "center",
+    flexShrink: 0,
   },
   questInfo: {
     flex: 1,
@@ -235,12 +237,14 @@ const styles = StyleSheet.create({
     fontFamily: "Nunito_700Bold",
     fontSize: 16,
     color: COLORS.headline,
-    marginBottom: 4,
+    marginBottom: 6,
+    lineHeight: 22,
   },
   questDescription: {
     fontFamily: "Nunito_600SemiBold",
-    fontSize: 13,
+    fontSize: 14,
     color: COLORS.muted,
+    lineHeight: 20,
   },
   progressContainer: {
     flexDirection: "row",

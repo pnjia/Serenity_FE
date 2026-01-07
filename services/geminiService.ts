@@ -17,8 +17,11 @@ export interface ChatMessage {
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 export async function sendMessageToGemini(message: string): Promise<string> {
-  if (!GEMINI_API_KEY) {
-    throw new Error("Gemini API key tidak ditemukan di .env");
+  console.log("[Gemini] API Key:", GEMINI_API_KEY ? "Found" : "Not Found");
+  console.log("[Gemini] API Key length:", GEMINI_API_KEY?.length);
+
+  if (!GEMINI_API_KEY || GEMINI_API_KEY.trim() === "") {
+    throw new Error("Gemini API key tidak ditemukan atau kosong");
   }
 
   const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
@@ -56,11 +59,18 @@ export async function sendMessageToGemini(message: string): Promise<string> {
 
       // Jika error bukan 503, atau sudah habis kesempatan mencoba -> Lempar Error
       let errorMessage = "Gagal memproses AI.";
+      console.error("[Gemini] Error details:", error);
+
       if (isOverloaded) {
         errorMessage =
           "Server AI sedang sangat sibuk. Silakan coba lagi nanti.";
-      } else if (error.message?.includes("API key")) {
-        errorMessage = "API Key bermasalah.";
+      } else if (
+        error.message?.includes("API_KEY_INVALID") ||
+        error.message?.includes("API key")
+      ) {
+        errorMessage = "API Key tidak valid. Periksa konfigurasi.";
+      } else if (error.message) {
+        errorMessage = `Error: ${error.message}`;
       }
 
       throw new Error(errorMessage);

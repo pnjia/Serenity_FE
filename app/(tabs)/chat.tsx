@@ -13,7 +13,10 @@ import {
   TextInput,
   View,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import {
+  SafeAreaView,
+  useSafeAreaInsets,
+} from "react-native-safe-area-context";
 import { ChatMessage, sendMessageToGemini } from "../../services/geminiService";
 
 const COLORS = {
@@ -27,6 +30,7 @@ const COLORS = {
 };
 
 export default function AIChatScreen() {
+  const insets = useSafeAreaInsets();
   const [messages, setMessages] = useState<ChatMessage[]>([
     {
       id: "welcome",
@@ -215,43 +219,48 @@ export default function AIChatScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={styles.container} edges={["top"]}>
       <StatusBar style="dark" backgroundColor={COLORS.backdrop} />
-
-      {/* Header */}
-      <View style={styles.header}>
-        <Image
-          source={require("../../assets/images/appLogo.png")}
-          style={styles.logo}
-        />
-        <Ionicons name="chatbubbles" size={32} color={COLORS.primary} />
-        <Text style={styles.headerTitle}>AI Chat</Text>
-      </View>
-
-      {/* Messages List */}
-      <FlatList
-        ref={flatListRef}
-        data={messages}
-        renderItem={renderMessage}
-        keyExtractor={(item) => item.id}
-        contentContainerStyle={styles.messagesList}
-        showsVerticalScrollIndicator={false}
-      />
-
-      {/* Loading Indicator */}
-      {isLoading && (
-        <View style={styles.loadingContainer}>
-          <ActivityIndicator size="small" color={COLORS.primary} />
-          <Text style={styles.loadingText}>AI sedang mengetik...</Text>
-        </View>
-      )}
-
-      {/* Input Area */}
       <KeyboardAvoidingView
+        style={{ flex: 1 }}
         behavior={Platform.OS === "ios" ? "padding" : undefined}
-        keyboardVerticalOffset={Platform.OS === "ios" ? 90 : 0}
+        keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 0}
       >
-        <View style={styles.inputContainer}>
+        {/* Header */}
+        <View style={styles.header}>
+          <Image
+            source={require("../../assets/images/appLogo.png")}
+            style={styles.logo}
+          />
+          <Ionicons name="chatbubbles" size={32} color={COLORS.primary} />
+          <Text style={styles.headerTitle}>AI Chat</Text>
+        </View>
+
+        {/* Messages List */}
+        <FlatList
+          ref={flatListRef}
+          data={messages}
+          renderItem={renderMessage}
+          keyExtractor={(item) => item.id}
+          contentContainerStyle={styles.messagesList}
+          showsVerticalScrollIndicator={false}
+        />
+
+        {/* Loading Indicator */}
+        {isLoading && (
+          <View style={styles.loadingContainer}>
+            <ActivityIndicator size="small" color={COLORS.primary} />
+            <Text style={styles.loadingText}>AI sedang mengetik...</Text>
+          </View>
+        )}
+
+        {/* Input Area */}
+        <View
+          style={[
+            styles.inputContainer,
+            { paddingBottom: 70 + insets.bottom + 10 },
+          ]}
+        >
           <TextInput
             style={styles.input}
             placeholder="Ketik pesan..."
@@ -289,17 +298,14 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: COLORS.backdrop,
-    alignItems: "center",
   },
   header: {
     flexDirection: "row",
     alignItems: "center",
-    paddingHorizontal: 24,
+    paddingHorizontal: 20,
     paddingVertical: 20,
     gap: 12,
     width: "100%",
-    maxWidth: 800,
-    alignSelf: "center",
   },
   logo: {
     width: 40,
@@ -316,8 +322,6 @@ const styles = StyleSheet.create({
     gap: 16,
     paddingBottom: 100,
     width: "100%",
-    maxWidth: 800,
-    alignSelf: "center",
   },
   messageContainer: {
     flexDirection: "row",
@@ -390,11 +394,9 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 8,
-    paddingHorizontal: 24,
+    paddingHorizontal: 20,
     paddingVertical: 12,
     width: "100%",
-    maxWidth: 800,
-    alignSelf: "center",
   },
   loadingText: {
     fontFamily: "Nunito_600SemiBold",
@@ -406,14 +408,12 @@ const styles = StyleSheet.create({
     alignItems: "flex-end",
     paddingHorizontal: 20,
     paddingVertical: 16,
-    paddingBottom: 90,
     gap: 12,
     backgroundColor: COLORS.white,
     borderTopWidth: 2,
     borderTopColor: "#E8EEFF",
     width: "100%",
-    maxWidth: 800,
-    alignSelf: "center",
+    maxWidth: "100%",
     shadowColor: COLORS.primary,
     shadowOffset: { width: 0, height: -4 },
     shadowOpacity: 0.08,
@@ -432,6 +432,7 @@ const styles = StyleSheet.create({
     color: COLORS.headline,
     maxHeight: 120,
     minHeight: 48,
+    maxWidth: "100%",
     borderWidth: 2,
     borderColor: "#E8EEFF",
     shadowColor: COLORS.primary,

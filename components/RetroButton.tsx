@@ -168,6 +168,7 @@ const styles = StyleSheet.create({
     height: "100%",
     justifyContent: "center",
     alignItems: "center",
+    paddingHorizontal: 16,
     zIndex: 2, // Pastikan di atas bayangan
     // elevation: 0, // Penting di Android untuk menghilangkan bayangan default yang blur
   },
@@ -186,8 +187,9 @@ const styles = StyleSheet.create({
 
   buttonText: {
     fontFamily: "Nunito_700Bold", // Gunakan font Nunito Bold agar tegas
-    fontSize: 18,
+    fontSize: 16,
     textAlign: "center",
+    flexShrink: 1,
   },
 });
 

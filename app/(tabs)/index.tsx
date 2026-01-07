@@ -94,7 +94,7 @@ export default function HomeScreen() {
     },
     {
       id: "2",
-      title: "Mengorganisir",
+      title: "Organisir",
       icon: <Ionicons name="book" size={40} color={COLORS.primary} />,
       description: "Main",
       route: "/games/mengorganisir",
@@ -132,34 +132,38 @@ export default function HomeScreen() {
   }
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={styles.container} edges={["top"]}>
       <StatusBar style="dark" backgroundColor={COLORS.backdrop} />
-      <ScrollView>
-        {/* Header */}
-        <View style={styles.header}>
-          <Image
-            source={require("../../assets/images/appLogo.png")}
-            style={styles.logo}
-          />
-          <View>
-            <Text style={styles.greeting}>Halo, Pengguna!</Text>
-            {user && <Text style={styles.userName}>{user.name}</Text>}
-          </View>
-          <View style={styles.streakContainer}>
-            <Text style={styles.streakLabel}>Streak anda</Text>
-            <Text style={styles.streakValue}>{progress?.streak || 0}</Text>
-          </View>
-          <View style={styles.avatarContainer}>
-            {user?.picture ? (
-              <Image source={{ uri: user.picture }} style={styles.avatar} />
-            ) : (
-              <View style={styles.avatarPlaceholder}>
-                <Ionicons name="person" size={24} color={COLORS.white} />
-              </View>
-            )}
-          </View>
-        </View>
 
+      {/* Header */}
+      <View style={styles.header}>
+        <Image
+          source={require("../../assets/images/appLogo.png")}
+          style={styles.logo}
+        />
+        <View style={styles.userInfo}>
+          <Text style={styles.greeting}>Halo, {user?.name || "Pengguna"}!</Text>
+          <Text style={styles.userName}>Angkasa</Text>
+        </View>
+        <View style={styles.streakContainer}>
+          <Text style={styles.streakLabel}>Streak anda</Text>
+          <Text style={styles.streakValue}>{progress?.streak || 0}</Text>
+        </View>
+        <View style={styles.avatarContainer}>
+          {user?.picture ? (
+            <Image source={{ uri: user.picture }} style={styles.avatar} />
+          ) : (
+            <View style={styles.avatarPlaceholder}>
+              <Ionicons name="person" size={24} color={COLORS.white} />
+            </View>
+          )}
+        </View>
+      </View>
+
+      <ScrollView
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+      >
         {/* Game Section */}
         <View style={styles.gameSection}>
           <Text style={styles.sectionTitle}>Main Game Apa Hari Ini?</Text>
@@ -196,7 +200,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: COLORS.backdrop,
-    alignItems: "center",
   },
   loadingContainer: {
     flex: 1,
@@ -210,46 +213,43 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     flexGrow: 1,
-    paddingHorizontal: 24,
-    paddingTop: 20,
-    paddingBottom: 100,
-    width: "100%",
-    maxWidth: 900,
+    paddingBottom: 90,
   },
   header: {
     flexDirection: "row",
     alignItems: "center",
-    marginBottom: 32,
-    gap: 16,
-    paddingHorizontal: 24,
-    paddingTop: 20,
-    maxWidth: 900,
+    gap: 12,
     width: "100%",
-    alignSelf: "center",
+    paddingHorizontal: 20,
+    paddingBottom: 16,
   },
   logo: {
     width: 50,
     height: 50,
     resizeMode: "contain",
   },
+  userInfo: {
+    flex: 1,
+  },
   greeting: {
     fontFamily: "Nunito_700Bold",
-    fontSize: 24,
+    fontSize: 18,
     color: COLORS.headline,
+    marginBottom: 4,
   },
   userName: {
     fontFamily: "Nunito_600SemiBold",
     fontSize: 14,
     color: COLORS.muted,
-    marginTop: 2,
+    lineHeight: 20,
   },
   streakContainer: {
-    flex: 1,
     alignItems: "flex-end",
+    minWidth: 80,
   },
   streakLabel: {
     fontFamily: "Nunito_600SemiBold",
-    fontSize: 14,
+    fontSize: 12,
     color: COLORS.muted,
   },
   streakValue: {
@@ -276,27 +276,24 @@ const styles = StyleSheet.create({
   },
   gameSection: {
     flex: 1,
-    paddingHorizontal: 24,
-    maxWidth: 900,
-    width: "100%",
-    alignSelf: "center",
+    paddingHorizontal: 20,
+    marginTop: 60,
   },
   sectionTitle: {
     fontFamily: "Nunito_700Bold",
     fontSize: 20,
     color: COLORS.headline,
-    marginBottom: 20,
+    lineHeight: 28,
+    marginBottom: 16,
   },
   gameGrid: {
     flexDirection: "row",
     flexWrap: "wrap",
     gap: 16,
-    justifyContent: "flex-start",
+    justifyContent: "space-between",
   },
   gameCard: {
     width: "47%",
-    minWidth: 180,
-    maxWidth: 220,
     backgroundColor: COLORS.cardBg,
     borderRadius: 20,
     padding: 20,
@@ -307,12 +304,11 @@ const styles = StyleSheet.create({
     elevation: 3,
     alignItems: "center",
     gap: 12,
-    cursor: "pointer",
   },
   iconWrapper: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
+    width: 70,
+    height: 70,
+    borderRadius: 35,
     backgroundColor: COLORS.backdrop,
     justifyContent: "center",
     alignItems: "center",
@@ -323,11 +319,13 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: COLORS.headline,
     textAlign: "center",
+    lineHeight: 22,
   },
   playButton: {
     flexDirection: "row",
     alignItems: "center",
     gap: 6,
+    paddingTop: 4,
   },
   playText: {
     fontFamily: "Nunito_600SemiBold",

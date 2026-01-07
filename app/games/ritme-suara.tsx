@@ -1,10 +1,13 @@
 import { Ionicons } from "@expo/vector-icons";
+import { Audio } from "expo-av";
+import * as Haptics from "expo-haptics";
 import { useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { useEffect, useState } from "react";
 import {
   Animated,
   BackHandler,
+  Platform,
   Pressable,
   StyleSheet,
   Text,
@@ -32,6 +35,52 @@ const SOUND_NOTES = [
   { id: 6, note: "A", frequency: 440.0, color: "#9B5DE5", label: "La" },
 ];
 
+// Generate a simple sine wave tone as base64 WAV data
+const generateToneBase64 = (frequency: number, duration: number): string => {
+  const sampleRate = 44100;
+  const numSamples = Math.floor(sampleRate * duration);
+  const buffer = new ArrayBuffer(44 + numSamples * 2);
+  const view = new DataView(buffer);
+
+  // WAV header
+  const writeString = (offset: number, string: string) => {
+    for (let i = 0; i < string.length; i++) {
+      view.setUint8(offset + i, string.charCodeAt(i));
+    }
+  };
+
+  writeString(0, "RIFF");
+  view.setUint32(4, 36 + numSamples * 2, true);
+  writeString(8, "WAVE");
+  writeString(12, "fmt ");
+  view.setUint32(16, 16, true);
+  view.setUint16(20, 1, true);
+  view.setUint16(22, 1, true);
+  view.setUint32(24, sampleRate, true);
+  view.setUint32(28, sampleRate * 2, true);
+  view.setUint16(32, 2, true);
+  view.setUint16(34, 16, true);
+  writeString(36, "data");
+  view.setUint32(40, numSamples * 2, true);
+
+  // Generate samples
+  for (let i = 0; i < numSamples; i++) {
+    const t = i / sampleRate;
+    const envelope = Math.exp(-3 * t); // Exponential decay
+    const sample = Math.sin(2 * Math.PI * frequency * t) * envelope * 0.5;
+    const value = Math.max(-1, Math.min(1, sample)) * 0x7fff;
+    view.setInt16(44 + i * 2, value, true);
+  }
+
+  // Convert to base64
+  const bytes = new Uint8Array(buffer);
+  let binary = "";
+  for (let i = 0; i < bytes.length; i++) {
+    binary += String.fromCharCode(bytes[i]);
+  }
+  return btoa(binary);
+};
+
 export default function RitmeSuaraGame() {
   const router = useRouter();
   const [level, setLevel] = useState(1);
@@ -50,6 +99,22 @@ export default function RitmeSuaraGame() {
   const [animatedValues] = useState(
     SOUND_NOTES.map(() => new Animated.Value(1))
   );
+
+  // Configure audio mode on mount
+  useEffect(() => {
+    const configureAudio = async () => {
+      try {
+        await Audio.setAudioModeAsync({
+          playsInSilentModeIOS: true,
+          staysActiveInBackground: false,
+          shouldDuckAndroid: true,
+        });
+      } catch (error) {
+        console.error("Error configuring audio:", error);
+      }
+    };
+    configureAudio();
+  }, []);
 
   useEffect(() => {
     const backHandler = BackHandler.addEventListener(
@@ -91,30 +156,93 @@ export default function RitmeSuaraGame() {
     router.push("/(tabs)" as any);
   };
 
-  const playSound = async (frequency: number, noteIndex: number) => {
+  const playSound = async (
+    frequency: number,
+    noteIndex: number,
+    isUserInteraction: boolean = false
+  ) => {
     try {
-      // Create a simple beep tone using Web Audio API (for web)
-      // For native, you'd need actual sound files or use expo-audio
-      if (typeof window !== "undefined" && window.AudioContext) {
-        const audioContext = new (window.AudioContext ||
-          (window as any).webkitAudioContext)();
-        const oscillator = audioContext.createOscillator();
-        const gainNode = audioContext.createGain();
+      // Haptic feedback ONLY during sequence playback, not user interaction
+      if (Platform.OS !== "web" && !isUserInteraction) {
+        await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+      }
 
-        oscillator.connect(gainNode);
-        gainNode.connect(audioContext.destination);
+      // Create AudioContext (works on web and modern React Native with Hermes)
+      let audioPlayed = false;
 
-        oscillator.frequency.value = frequency;
-        oscillator.type = "sine";
+      // Try native audio first for better compatibility on mobile
+      if (Platform.OS !== "web") {
+        try {
+          const { sound } = await Audio.Sound.createAsync(
+            {
+              uri: `data:audio/wav;base64,${generateToneBase64(
+                frequency,
+                0.3
+              )}`,
+            },
+            { shouldPlay: true, volume: 1.0 }
+          );
+          await sound.playAsync();
+          setTimeout(() => {
+            sound.unloadAsync();
+          }, 400);
+          audioPlayed = true;
+        } catch (nativeAudioError) {
+          console.log(
+            "Native audio not available, trying Web Audio API:",
+            nativeAudioError
+          );
+        }
+      }
 
-        gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
-        gainNode.gain.exponentialRampToValueAtTime(
-          0.01,
-          audioContext.currentTime + 0.5
+      // Fallback to Web Audio API
+      if (!audioPlayed) {
+        try {
+          // Try Web Audio API (works on web and some native platforms)
+          const AudioContextClass =
+            (typeof window !== "undefined" &&
+              (window.AudioContext || (window as any).webkitAudioContext)) ||
+            (global as any).AudioContext ||
+            (global as any).webkitAudioContext;
+
+          if (AudioContextClass) {
+            const audioContext = new AudioContextClass();
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+
+            oscillator.frequency.value = frequency;
+            oscillator.type = "sine";
+
+            // Attack and decay envelope with higher volume
+            const now = audioContext.currentTime;
+            gainNode.gain.setValueAtTime(0, now);
+            gainNode.gain.linearRampToValueAtTime(0.7, now + 0.05);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.4);
+
+            oscillator.start(now);
+            oscillator.stop(now + 0.4);
+
+            audioPlayed = true;
+          }
+        } catch (audioError) {
+          console.log("Web Audio API not available:", audioError);
+        }
+      }
+
+      // If audio didn't play, provide additional haptic feedback
+      if (!audioPlayed && Platform.OS !== "web") {
+        // Provide longer haptic feedback pattern to simulate sound
+        setTimeout(
+          () => Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light),
+          50
         );
-
-        oscillator.start(audioContext.currentTime);
-        oscillator.stop(audioContext.currentTime + 0.5);
+        setTimeout(
+          () => Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light),
+          100
+        );
       }
 
       // Animate the note
@@ -135,6 +263,22 @@ export default function RitmeSuaraGame() {
       });
     } catch (error) {
       console.error("Error playing sound:", error);
+      // Still animate even if sound fails
+      setPlayingNote(noteIndex);
+      Animated.sequence([
+        Animated.timing(animatedValues[noteIndex], {
+          toValue: 1.2,
+          duration: 100,
+          useNativeDriver: true,
+        }),
+        Animated.timing(animatedValues[noteIndex], {
+          toValue: 1,
+          duration: 100,
+          useNativeDriver: true,
+        }),
+      ]).start(() => {
+        setPlayingNote(null);
+      });
     }
   };
 
@@ -185,7 +329,7 @@ export default function RitmeSuaraGame() {
   const handleNotePress = async (noteIndex: number) => {
     if (gameState !== "playing") return;
 
-    await playSound(SOUND_NOTES[noteIndex].frequency, noteIndex);
+    await playSound(SOUND_NOTES[noteIndex].frequency, noteIndex, true);
 
     const newUserSequence = [...userSequence, noteIndex];
     setUserSequence(newUserSequence);

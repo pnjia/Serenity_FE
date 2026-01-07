@@ -75,6 +75,7 @@ const RetroInput: React.FC<RetroInputProps> = ({
 const styles = StyleSheet.create({
   container: {
     width: "100%",
+    maxWidth: "100%",
     justifyContent: "center",
     position: "relative",
     marginVertical: 8,
@@ -89,6 +90,7 @@ const styles = StyleSheet.create({
 
   inputWrapper: {
     width: "100%",
+    maxWidth: "100%",
     backgroundColor: COLORS.backdrop, // Warna background input (Light Blue-ish)
     borderWidth: 1.5,
     borderColor: COLORS.headline, // Border gelap
@@ -106,7 +108,7 @@ const styles = StyleSheet.create({
     fontFamily: "Nunito_600SemiBold", // Pastikan font sudah di-link
     fontSize: 16,
     color: COLORS.headline,
-    paddingRight: 48,
+    paddingRight: 52,
   },
 
   accessory: {

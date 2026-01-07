@@ -18,9 +18,16 @@
         "backgroundColor": "#FFFFFF",
         "foregroundImage": "./assets/images/appLogo.png"
       },
-      "edgeToEdgeEnabled": true,
-      "predictiveBackGestureEnabled": false,
-      "package": "com.serenity.app"
+      "package": "com.serenity.app",
+      "softwareKeyboardLayoutMode": "pan",
+      "statusBar": {
+        "barStyle": "dark-content",
+        "backgroundColor": "#F4F7FE"
+      },
+      "navigationBar": {
+        "barStyle": "dark-content",
+        "backgroundColor": "#F4F7FE"
+      }
     },
     "web": {
       "output": "static",
@@ -31,12 +38,13 @@
       [
         "expo-splash-screen",
         {
-          "image": "./assets/images/splash-icon.png",
-          "imageWidth": 200,
+          "image": "./assets/images/appLogo.png",
+          "imageWidth": 250,
           "resizeMode": "contain",
-          "backgroundColor": "#ffffff",
+          "backgroundColor": "#F4F7FE",
           "dark": {
-            "backgroundColor": "#000000"
+            "image": "./assets/images/appLogo.png",
+            "backgroundColor": "#1B2559"
           }
         }
       ]
@@ -44,6 +52,12 @@
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "6247cd0d-931f-4505-8e0e-94351c499756"
+      }
     }
   }
 }

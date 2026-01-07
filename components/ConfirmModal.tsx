@@ -108,9 +108,11 @@ const styles = StyleSheet.create({
   button: {
     flex: 1,
     paddingVertical: 14,
+    paddingHorizontal: 8,
     borderRadius: 12,
     alignItems: "center",
     justifyContent: "center",
+    minWidth: 120,
   },
   cancelButton: {
     backgroundColor: "#F4F7FE",
@@ -127,7 +129,8 @@ const styles = StyleSheet.create({
   },
   confirmButtonText: {
     fontFamily: "Nunito_700Bold",
-    fontSize: 16,
+    fontSize: 14,
     color: COLORS.white,
+    textAlign: "center",
   },
 });

@@ -134,10 +134,41 @@ export const UserProgressStore = {
         .get();
 
       if (doc.exists) {
-        return {
+        const progress = {
           id: doc.id,
           ...doc.data(),
         };
+
+        // Check if streak should be reset (user didn't play yesterday)
+        const lastStreakDate = progress.lastStreakDate
+          ? new Date(progress.lastStreakDate)
+          : null;
+
+        if (lastStreakDate && progress.streak > 0) {
+          const now = new Date();
+          const todayStart = new Date(
+            Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate())
+          );
+          const lastStreakStart = new Date(
+            Date.UTC(
+              lastStreakDate.getUTCFullYear(),
+              lastStreakDate.getUTCMonth(),
+              lastStreakDate.getUTCDate()
+            )
+          );
+
+          const daysDiff = Math.floor(
+            (todayStart - lastStreakStart) / (1000 * 60 * 60 * 24)
+          );
+
+          // If more than 1 day has passed since last play, reset streak to 0
+          if (daysDiff > 1) {
+            await this.update(userId, { streak: 0 });
+            progress.streak = 0;
+          }
+        }
+
+        return progress;
       }
 
       // Create default progress
@@ -216,9 +247,6 @@ export const UserProgressStore = {
     try {
       const progress = await this.getOrCreate(userId);
       const now = new Date();
-      const lastPlayed = progress.lastPlayedAt
-        ? new Date(progress.lastPlayedAt)
-        : null;
 
       let newStreak = progress.streak || 0;
       let lastStreakDate = progress.lastStreakDate
@@ -240,7 +268,7 @@ export const UserProgressStore = {
         : null;
 
       if (!lastStreakStart) {
-        // First time playing
+        // First time playing ever - set streak to 1
         newStreak = 1;
       } else {
         const daysDiff = Math.floor(
@@ -248,13 +276,13 @@ export const UserProgressStore = {
         );
 
         if (daysDiff === 0) {
-          // Same day, keep streak (don't increment)
+          // Same day, keep current streak (don't increment)
           newStreak = progress.streak || 1;
         } else if (daysDiff === 1) {
-          // Next day, increment streak
+          // Next consecutive day, increment streak
           newStreak = (progress.streak || 0) + 1;
         } else if (daysDiff > 1) {
-          // Streak broken, reset to 1
+          // Missed a day, streak broken - reset to 1
           newStreak = 1;
         }
       }
